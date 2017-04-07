@@ -1,7 +1,14 @@
 import os
+import sys
 import django
 
 DEBUG = os.environ.get('DEBUG', False)
+
+if 'DEBUG' not in os.environ:
+    for cmd in ('runserver', 'pytest', 'py.test'):
+        if cmd in sys.argv[0] or cmd in sys.argv[1]:
+            DEBUG=True
+            continue
 TEMPLATE_DEBUG = DEBUG
 LOG_LEVEL = os.environ.get('DJANGO_LOG_LEVEL', 'INFO')
 
@@ -53,6 +60,7 @@ INSTALLED_APPS = [
 
     # test apps
     'select2_foreign_key',
+    'select2_list',
     'select2_generic_foreign_key',
     'select2_many_to_many',
     'select2_one_to_one',
@@ -62,6 +70,7 @@ INSTALLED_APPS = [
     'select2_outside_admin',
     'secure_data',
     'linked_data',
+    'rename_forward',
 
     'gm2m',
     'select2_gm2m',
@@ -90,11 +99,16 @@ ROOT_URLCONF = 'urls'
 WSGI_APPLICATION = 'wsgi.application'
 
 SECRET_KEY = '58$1jvc332=lyfk_m^jl6ody$7pbk18nm95==!r$7m5!2dp%l@'
-DEBUG = True
 ALLOWED_HOSTS = []
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
+]
+
+if not DEBUG:
+    MIDDLEWARE_CLASSES.append('whitenoise.middleware.WhiteNoiseMiddleware')
+
+MIDDLEWARE_CLASSES += [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -106,6 +120,9 @@ MIDDLEWARE_CLASSES = [
 
 AUTH_PASSWORD_VALIDATORS = []
 DJANGO_LIVE_TEST_SERVER_ADDRESS="localhost:8000-8010,8080,9200-9300"
+
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -124,6 +141,11 @@ from socket import gethostname
 ALLOWED_HOSTS = [
     gethostname(),
 ]
+
+if DEBUG:
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS.append('dal-yourlabs.rhcloud.com')
 
 STATIC_URL = '/public/static/'
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'public', 'static')

@@ -3,14 +3,14 @@ from dal.test.utils import OwnedFixtures
 
 from dal_select2.test import Select2Story
 
-from .models import TestModel
+from .models import TModel
 
 
 class AdminLinkedDataTest(Select2Story, case.AdminMixin, case.OptionMixin,
                           case.AutocompleteTestCase):
     field_name = 'test'
     inline_related_name = 'inline_test_models'
-    model = TestModel
+    model = TModel
 
     def setUp(self):
         super(AdminLinkedDataTest, self).setUp()
@@ -25,7 +25,8 @@ class AdminLinkedDataTest(Select2Story, case.AdminMixin, case.OptionMixin,
         story = stories.SelectOption(self)
         story.toggle_autocomplete()
 
-        expected = self.model.objects.filter(
-            owner=self.fixtures.test).values_list('name', flat=True)
-        self.assertEqual(sorted(expected),
-                         sorted(story.get_suggestions_labels()))
+        story.assert_suggestion_labels_are(
+            self.model.objects.filter(
+                owner=self.fixtures.test
+            ).values_list('name', flat=True)
+        )

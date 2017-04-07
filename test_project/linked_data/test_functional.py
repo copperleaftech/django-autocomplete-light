@@ -3,7 +3,7 @@ from dal.test.utils import OwnedFixtures
 
 from dal_select2.test import Select2Story
 
-from .models import TestModel
+from .models import TModel
 
 
 class AdminLinkedDataTest(Select2Story,
@@ -12,7 +12,7 @@ class AdminLinkedDataTest(Select2Story,
                           case.AutocompleteTestCase):
     field_name = 'test'
     inline_related_name = 'inline_test_models'
-    model = TestModel
+    model = TModel
 
     def setUp(self):
         super(AdminLinkedDataTest, self).setUp()
@@ -35,25 +35,27 @@ class AdminLinkedDataTest(Select2Story,
 
         story.toggle_autocomplete()
 
-        expected = self.model.objects.values_list('name', flat=True)
-        self.assertEqual(sorted(expected),
-                         sorted(story.get_suggestions_labels()))
+        story.assert_suggestion_labels_are(
+            self.model.objects.values_list('name', flat=True)
+        )
 
         self.set_owner(self.fixtures.test.pk)
         story.refresh_autocomplete()
 
-        expected = self.model.objects.filter(
-            owner=self.fixtures.test).values_list('name', flat=True)
-        self.assertEqual(sorted(expected),
-                         sorted(story.get_suggestions_labels()))
+        story.assert_suggestion_labels_are(
+            self.model.objects.filter(
+                owner=self.fixtures.test
+            ).values_list('name', flat=True)
+        )
 
         self.set_owner(self.fixtures.other.pk)
         story.refresh_autocomplete()
 
-        expected = self.model.objects.filter(
-            owner=self.fixtures.other).values_list('name', flat=True)
-        self.assertEqual(sorted(expected),
-                         sorted(story.get_suggestions_labels()))
+        story.assert_suggestion_labels_are(
+            self.model.objects.filter(
+                owner=self.fixtures.other
+            ).values_list('name', flat=True)
+        )
 
     def test_filter_option_in_first_inline(self):
         self.prefix = '%s-%s-' % (self.inline_related_name, 0)

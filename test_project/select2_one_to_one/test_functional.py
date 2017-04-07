@@ -2,7 +2,7 @@ from dal.test import case, stories
 
 from dal_select2.test import Select2Story
 
-from .models import TestModel
+from .models import TModel
 
 
 class AdminOneToOneTestCase(Select2Story, case.AdminMixin, case.OptionMixin,
@@ -10,7 +10,7 @@ class AdminOneToOneTestCase(Select2Story, case.AdminMixin, case.OptionMixin,
 
     field_name = 'test'
     inline_related_name = 'inline_test_models'
-    model = TestModel
+    model = TModel
 
     def setUp(self):
         super(AdminOneToOneTestCase, self).setUp()
@@ -25,7 +25,7 @@ class AdminOneToOneTestCase(Select2Story, case.AdminMixin, case.OptionMixin,
         story.create_option(name)
 
         story.assert_value(self.model.objects.get(name=name).pk)
-        self.assertIn(name, story.get_label())
+        story.assert_label(name)
 
         story.submit()
 

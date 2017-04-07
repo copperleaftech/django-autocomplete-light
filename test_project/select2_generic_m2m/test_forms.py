@@ -4,13 +4,16 @@ from django import forms
 from django import http
 from django import test
 from django.contrib.auth.models import Group
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 from django.utils import six
 
 from queryset_sequence import QuerySetSequence
 
-from .forms import TestForm
-from .models import TestModel
+from .forms import TForm
+from .models import TModel
 
 
 class GenericSelect2TestMixin(object):
@@ -37,6 +40,7 @@ class GenericSelect2TestMixin(object):
             self.id(), self.get_value(m0), self.get_value(m1))))
         expected = [m0, m1]
 
+        assert form.is_valid()
         instance = form.save()
 
         self.assert_relation_equals(expected, instance.test.all())
@@ -86,8 +90,8 @@ class GenericSelect2TestMixin(object):
 
 
 class GenericM2MFormTest(GenericSelect2TestMixin, test.TestCase):
-    model = TestModel
-    form = TestForm
+    model = TModel
+    form = TForm
     url_name = 'select2_generic_m2m'
 
     def add_relations(self, fixture, relations):

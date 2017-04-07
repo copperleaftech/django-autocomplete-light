@@ -2,13 +2,16 @@ import django
 from django import forms
 from django import http
 from django import test
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 from django.utils import six
 
 from taggit.models import Tag
 
-from .forms import TestForm
-from .models import TestModel
+from .forms import TForm
+from .models import TModel
 
 
 class TagSelect2TestMixin(object):
@@ -32,6 +35,18 @@ class TagSelect2TestMixin(object):
         self.assertEqual(
             list(self.model.objects.get(pk=instance.pk).test.all()),
             [existing, new]
+        )
+
+    def test_multi_words_tag(self):
+        multi_words_tag = self.tag.objects.create(name='multi words')
+        form = self.form(http.QueryDict('name=%s&test=%s' % (
+            self.id(), multi_words_tag)))
+
+        instance = form.save()
+
+        self.assertEqual(
+            list(self.model.objects.get(pk=instance.pk).test.all()),
+            [multi_words_tag, ]
         )
 
     def test_initial(self):
@@ -62,7 +77,7 @@ class TagSelect2TestMixin(object):
 
 
 class TaggitFormTest(TagSelect2TestMixin, test.TestCase):
-    form = TestForm
-    model = TestModel
+    form = TForm
+    model = TModel
     tag = Tag
     url_name = 'select2_taggit'
